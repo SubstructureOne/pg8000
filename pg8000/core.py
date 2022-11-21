@@ -9,6 +9,9 @@ from struct import Struct
 
 import scramp
 
+from pg8000.websocket import WebSocketWrapper
+
+
 from pg8000.converters import (
     PG_PY_ENCODINGS,
     PG_TYPES,
@@ -159,6 +162,7 @@ class CoreConnection:
         password=None,
         source_address=None,
         unix_sock=None,
+        websocket=False,
         ssl_context=None,
         timeout=None,
         tcp_keepalive=True,
@@ -210,7 +214,10 @@ class CoreConnection:
 
         self._caches = {}
 
-        if unix_sock is None and host is not None:
+        if websocket:
+            self._usock = WebSocketWrapper.create_connection(host, port)
+
+        elif unix_sock is None and host is not None:
             try:
                 self._usock = socket.create_connection(
                     (host, port), timeout, source_address
